@@ -26,8 +26,8 @@ rm -f /etc/systemd/system/trojan-go.service
 rm -f /etc/systemd/system/vvlink.service
 rm -f /etc/systemd/system/vvlink-tj.service
 rm -rf $key
-mkdir $key
-cd $key
+mkdir $license
+cd $license
 wget https://github.com/tokumeikoi/tidalab-trojan/releases/latest/download/tidalab-trojan
 wget https://github.com/p4gefau1t/trojan-go/releases/download/v0.8.1/trojan-go-linux-amd64.zip
 curl "${api}/api/v1/server/TrojanTidalab/config?token=${key}&node_id=${nodeId}&local_port=${localPort}" > ./config.json
@@ -66,7 +66,7 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vvlink-tj.pid
-ExecStart=/root/$key/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license
+ExecStart=/root/$license/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license
 Restart=on-failure
 
 [Install]
