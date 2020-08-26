@@ -17,19 +17,29 @@ license=$5
 
 systemctl stop firewalld
 systemctl disable firewalld
-systemctl stop v2ray.service
+systemctl stop trojan-go.service
 systemctl stop vvlink.service
-systemctl stop vvlink-v2.service
+systemctl stop vvlink-tj.service
 echo '结束进程'
 sleep 3
-rm -f /etc/systemd/system/v2ray.service
+rm -f /etc/systemd/system/trojan-go.service
 rm -f /etc/systemd/system/vvlink.service
-rm -f /etc/systemd/system/vvlink-v2.service
+rm -f /etc/systemd/system/vvlink-tj.service
 rm -rf $key
 mkdir $key
 cd $key
-wget https://github.com/tokumeikoi/aurora/releases/latest/download/aurora
-wget https://github.com/v2ray/v2ray-core/releases/latest/download/v2ray-linux-64.zip
+wget https://github.com/tokumeikoi/tidalab-trojan/releases/latest/download/tidalab-trojan
+wget https://github.com/p4gefau1t/trojan-go/releases/download/v0.8.1/trojan-go-linux-amd64.zip
+curl "${api}/api/v1/server/TrojanTidalab/config?token=${key}&node_id=${nodeId}&local_port=${localPort}" > ./config.json
+
+if cat config.json | grep "run_type" > /dev/null
+    then
+    echo '配置获取成功'
+else
+    echo '配置获取失败'
+    exit
+fi
+
 wget https://dpsky.cn/vvlink-a07wm6/vvlink.key
 wget https://dpsky.cn/vvlink-a07wm6/vvlink.crt
 mkdir /root/.cert
@@ -37,26 +47,34 @@ cp vvlink.crt /root/.cert/server.crt
 cp vvlink.key /root/.cert/server.key
 chmod 400 /root/.cert/server.*
 
-unzip v2ray-linux-64.zip
+if ls /root/.cert | grep "key" > /dev/null
+    then
+    echo '证书存在'
+else
+    echo '请签发证书后在执行'
+    exit
+fi
+
+unzip trojan-go-linux-amd64.zip
 chmod 755 *
-cat << EOF >> /etc/systemd/system/vvlink-v2.service
+cat << EOF >> /etc/systemd/system/vvlink-tj.service
 [Unit]
-Description=vvLink-v2 Service
+Description=vvLink-tj Service
 After=network.target
 Wants=network.target
 
 [Service]
 Type=simple
-PIDFile=/run/vvlink-v2.pid
-ExecStart=/root/$key/aurora -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license
+PIDFile=/run/vvlink-tj.pid
+ExecStart=/root/$key/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license
 Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable vvlink-v2
-systemctl start vvlink-v2
+systemctl enable vvlink-tj
+systemctl start vvlink-tj
 echo '部署完成'
 sleep 3
-systemctl status vvlink-v2
+systemctl status vvlink-tj
