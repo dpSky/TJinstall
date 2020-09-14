@@ -2,11 +2,13 @@
 echo '正在安装依赖'
 if cat /etc/os-release | grep "centos" > /dev/null
     then
-    yum update
+    yum update > /dev/null
     yum install unzip wget curl -y > /dev/null
+    yum update curl -y
 else
-    apt-get update
+    apt update > /dev/null
     apt-get install unzip wget curl -y > /dev/null
+    apt-get update curl -y
 fi
 
 api=$1
@@ -14,18 +16,32 @@ key=$2
 nodeId=$3
 localPort=$4
 license=$5
+folder=$key-trojan
+if [[ "$6" -ne "" ]]
+    then
+    syncInterval=$6
+else
+    syncInterval=60
+fi
 
+#kill old process and delete dir
 systemctl stop firewalld
 systemctl disable firewalld
 systemctl stop trojan-go.service
 systemctl stop vvlink.service
 systemctl stop vvlink-tj.service
+kill -9 $(ps -ef | grep ${folder} | grep -v grep | grep -v bash | awk '{print $2}') 1 > /dev/null
+kill -9 $(ps -ef | grep defunct | grep -v grep | awk '{print $2}') 1 > /dev/null
+echo '结束进程'
+rm -rf $folder
 echo '结束进程'
 sleep 3
-rm -f /etc/systemd/system/trojan-go.service
-rm -f /etc/systemd/system/vvlink.service
-rm -f /etc/systemd/system/vvlink-tj.service
-rm -rf $key
+rm -rf /etc/systemd/system/trojan-go.service
+rm -rf /etc/systemd/system/vvlink.service
+rm -rf /etc/systemd/system/vvlink-tj.service
+rm -rf $key-trojan
+
+#create dir, init files
 mkdir $license
 cd $license
 wget https://github.com/tokumeikoi/tidalab-trojan/releases/latest/download/tidalab-trojan
@@ -47,6 +63,9 @@ cp vvlink.crt /root/.cert/server.crt
 cp vvlink.key /root/.cert/server.key
 chmod 400 /root/.cert/server.*
 
+unzip trojan-go-linux-amd64.zip
+chmod 755 *
+
 if ls /root/.cert | grep "key" > /dev/null
     then
     echo '证书存在'
@@ -55,8 +74,7 @@ else
     exit
 fi
 
-unzip trojan-go-linux-amd64.zip
-chmod 755 *
+
 cat << EOF >> /etc/systemd/system/vvlink-tj.service
 [Unit]
 Description=vvLink-tj Service
@@ -66,7 +84,7 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vvlink-tj.pid
-ExecStart=/root/$license/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license
+ExecStart=/root/$license/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
 
 [Install]
@@ -78,3 +96,10 @@ systemctl start vvlink-tj
 echo '部署完成'
 sleep 3
 systemctl status vvlink-tj
+cat tidalab.log
+if ls | grep "service.log"
+	then
+	cat service.log
+else
+	echo '启动失败'
+fi
