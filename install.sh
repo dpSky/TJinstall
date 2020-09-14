@@ -40,6 +40,7 @@ rm -rf /etc/systemd/system/trojan-go.service
 rm -rf /etc/systemd/system/vvlink.service
 rm -rf /etc/systemd/system/vvlink-tj.service
 rm -rf $key-trojan
+rm -rf $license
 
 #create dir, init files
 mkdir $license
@@ -96,6 +97,7 @@ systemctl start vvlink-tj
 echo '部署完成'
 sleep 3
 systemctl status vvlink-tj
+
 cat tidalab.log
 if ls | grep "service.log"
 	then
