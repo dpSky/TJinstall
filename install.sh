@@ -75,6 +75,15 @@ else
     exit
 fi
 
+#run server
+nohup `pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
+cat tidalab.log
+if ls | grep "service.log"
+	then
+	cat service.log
+else
+	echo '启动失败'
+fi
 
 cat << EOF >> /etc/systemd/system/vvlink-tj.service
 [Unit]
@@ -85,7 +94,7 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vvlink-tj.pid
-ExecStart=/root/$license/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
+ExecStart=/root/$license/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval
 Restart=on-failure
 
 [Install]
@@ -97,11 +106,3 @@ systemctl start vvlink-tj
 echo '部署完成'
 sleep 3
 systemctl status vvlink-tj
-
-cat tidalab.log
-if ls | grep "service.log"
-	then
-	cat service.log
-else
-	echo '启动失败'
-fi
