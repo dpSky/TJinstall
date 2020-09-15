@@ -98,7 +98,7 @@ Type=simple
 StandardError=journal
 User=nobody
 PIDFile=/run/vvlink-tj.pid
-ExecStart=/root/$folder/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
+ExecStart=`pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
 
 [Install]
