@@ -97,6 +97,7 @@ Wants=network-online.target
 Type=simple
 StandardError=journal
 User=nobody
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 PIDFile=/run/vvlink-tj.pid
 ExecStart=`pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
