@@ -29,12 +29,17 @@ kill -9 $(ps -ef | grep ${folder} | grep -v grep | grep -v bash | awk '{print $2
 kill -9 $(ps -ef | grep defunct | grep -v grep | awk '{print $2}') 1 > /dev/null
 systemctl stop firewalld
 systemctl disable firewalld
+systemctl stop trojan-go.service
+systemctl disable trojan-go.service
 systemctl stop vvlink-tj.service
 systemctl disable vvlink-tj.service
-echo '结束进程'
+rm -f /etc/systemd/system/trojan-go.service
+rm -f /etc/systemd/system/vvlink-tj.service
 rm -rf $key
 rm -rf $folder
 rm -rf $license
+echo '旧服务已移除'
+sleep 3
 
 #create dir, init files
 mkdir $folder
@@ -85,11 +90,13 @@ fi
 cat << EOF >> /etc/systemd/system/vvlink-tj.service
 [Unit]
 Description=vvLink-tj Service
-After=network.target
-Wants=network.target
-[Service]
+After=network.target network-online.target nss-lookup.target mysql.service mariadb.service mysqld.service
+Wants=network-online.target
 
+[Service]
 Type=simple
+StandardError=journal
+User=nobody
 PIDFile=/run/vvlink-tj.pid
 ExecStart=/root/$folder/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
