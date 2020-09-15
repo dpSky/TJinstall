@@ -90,14 +90,11 @@ fi
 cat << EOF >> /etc/systemd/system/vvlink-tj.service
 [Unit]
 Description=vvLink-tj Service
-After=network.target network-online.target nss-lookup.target mysql.service mariadb.service mysqld.service
-Wants=network-online.target
+After=network.target nss-lookup.target
+Wants=network.target
 
 [Service]
 Type=simple
-StandardError=journal
-User=nobody
-AmbientCapabilities=CAP_NET_BIND_SERVICE
 PIDFile=/run/vvlink-tj.pid
 ExecStart=`pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
