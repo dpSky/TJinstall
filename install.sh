@@ -96,6 +96,7 @@ Wants=network.target
 [Service]
 Type=simple
 PIDFile=/run/vvlink-tj.pid
+WorkingDirectory=`pwd`/
 ExecStart=`pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
 
@@ -105,6 +106,7 @@ EOF
 
 systemctl enable vvlink-tj
 systemctl daemon-reload
+systemctl start vvlink-tj
 echo '部署完成'
 sleep 3
 systemctl status vvlink-tj
