@@ -104,9 +104,9 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOF
 
-systemctl enable vvlink-tj
+systemctl enable vvlink-tj.service
 systemctl daemon-reload
-systemctl start vvlink-tj
+systemctl start vvlink-tj.service
 echo '部署完成'
 sleep 3
-systemctl status vvlink-tj
+systemctl status vvlink-tj.service
