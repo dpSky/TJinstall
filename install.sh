@@ -15,12 +15,11 @@ timedatectl set-timezone Asia/Shanghai
 api=$1
 key=$2
 nodeId=$3
-localPort=$4
-license=$5
+license=$4
 folder=$key-tj
-if [[ "$6" -ne "" ]]
+if [[ "$5" -ne "" ]]
     then
-    syncInterval=$6
+    syncInterval=$5
 else
     syncInterval=60
 fi
@@ -53,15 +52,6 @@ cp vvlink.key /root/.cert/server.key
 chmod 400 /root/.cert/server.*
 wget https://github.com/tokumeikoi/tidalab-trojan/releases/latest/download/tidalab-trojan
 wget https://github.com/p4gefau1t/trojan-go/releases/download/v0.8.2/trojan-go-linux-amd64.zip
-curl "${api}/api/v1/server/TrojanTidalab/config?token=${key}&node_id=${nodeId}&local_port=${localPort}" > ./config.json
-
-if cat config.json | grep "run_type" > /dev/null
-    then
-    echo '配置获取成功'
-else
-    echo '配置获取失败'
-    exit
-fi
 
 unzip trojan-go-linux-amd64.zip
 chmod 755 *
@@ -75,7 +65,7 @@ else
 fi
 
 #run server
-nohup `pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
+nohup `pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 echo '启动成功'
 sleep 3
 cat tidalab.log
@@ -97,7 +87,7 @@ Wants=network.target
 Type=simple
 PIDFile=/run/vvlink-tj.pid
 WorkingDirectory=`pwd`/
-ExecStart=`pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -localport=$localPort -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
+ExecStart=`pwd`/tidalab-trojan -api=$api -token=$key -node=$nodeId -license=$license -syncInterval=$syncInterval > tidalab.log 2>&1 &
 Restart=on-failure
 
 [Install]
